@@ -75,3 +75,5 @@ MIT — see [LICENSE](LICENSE).
 The repository is published separately from npm. To push from a local machine, use `tools/publish.ps1`. It reads `GITHUB_TOKEN` or prompts securely; it never writes the token to disk. The token must be fine-grained, limited to this repository, with **Contents: Read and write**.
 
 Revoke any token that has been pasted into chat, logs, issues, or shell history.
+
+> **Security Warning:** Never commit real `ntfy` topics or tokens. Treat topic names as credentials because anyone who knows a topic may be able to publish or subscribe to it, depending on its configuration.
