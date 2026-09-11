@@ -14,7 +14,7 @@ Get a push on your phone when your agent needs you. Tap **A / B / C** — the ag
 - Two implementations, one shared state format: a zero-dependency **npm CLI** (`npx agent-ping-cli`, works anywhere Node runs) and native **PowerShell scripts** (no Node required). Mix and match — ask from one, watch from the other.
 - Agents just call a command and read stdout (`DECISION_ID=…`, `RESPONSE_RECEIVED`, `OPTION=…`)
 - One pending decision at a time, waiting queue, expiry, exactly-once replies, file-locked state for concurrent runs
-- Queue promotion is retried after a decision resolves; failed sends stay queued rather than being lost
+- Queue promotion is retried after a decision resolves; if a promotion send fails, the queued decision stays queued and is retried on the next ask/watch call
 - Private by design: real ntfy topics live in your local config (git-ignored), never in the repo — CI secret-scans every push
 
 ## Quickstart (5 min)
@@ -66,6 +66,8 @@ If this earns real usage, next on the list: structured audit logs for maintainer
 
 Real ntfy topics and `state/` are git-ignored and secret-scanned. Never commit real topics, message IDs, or decision history. Publish code + docs only.
 
+> **Security Warning:** Never commit real `ntfy` topics or tokens. Treat topic names as credentials because anyone who knows a topic may be able to publish or subscribe to it, depending on its configuration.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
@@ -75,5 +77,3 @@ MIT — see [LICENSE](LICENSE).
 The repository is published separately from npm. To push from a local machine, use `tools/publish.ps1`. It reads `GITHUB_TOKEN` or prompts securely; it never writes the token to disk. The token must be fine-grained, limited to this repository, with **Contents: Read and write**.
 
 Revoke any token that has been pasted into chat, logs, issues, or shell history.
-
-> **Security Warning:** Never commit real `ntfy` topics or tokens. Treat topic names as credentials because anyone who knows a topic may be able to publish or subscribe to it, depending on its configuration.
