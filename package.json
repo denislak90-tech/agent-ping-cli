@@ -1,0 +1,42 @@
+{
+  "name": "agent-ping-cli",
+  "version": "0.1.0",
+  "description": "Phone-tap A/B/C approvals for coding agents, over ntfy.sh. Zero runtime dependencies.",
+  "bin": {
+    "agent-ping": "bin/agent-ping.js"
+  },
+  "main": "lib/common.js",
+  "files": [
+    "bin",
+    "lib",
+    "config.example.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "keywords": [
+    "agent",
+    "ntfy",
+    "notifications",
+    "human-in-the-loop",
+    "approval",
+    "codex",
+    "opencode",
+    "claude-code",
+    "cli"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOU/agent-ping.git"
+  },
+  "homepage": "https://github.com/YOU/agent-ping#readme",
+  "bugs": {
+    "url": "https://github.com/YOU/agent-ping/issues"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  }
+}
