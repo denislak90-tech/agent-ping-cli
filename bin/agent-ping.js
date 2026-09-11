@@ -8,6 +8,11 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg.startsWith('--')) {
+      const eq = arg.indexOf('=');
+      if (eq !== -1) {
+        out[arg.slice(2, eq)] = arg.slice(eq + 1);
+        continue;
+      }
       const key = arg.slice(2);
       const next = argv[i + 1];
       if (next === undefined || next.startsWith('--')) {
@@ -36,7 +41,7 @@ async function main() {
   const [, , cmd, ...rest] = process.argv;
   const args = parseArgs(rest);
 
-  if (!cmd || cmd === '--help' || cmd === '-h') {
+  if (!cmd || cmd === '--help' || cmd === '-h' || args.help) {
     printUsage();
     process.exit(cmd ? 0 : 1);
   }
