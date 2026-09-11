@@ -183,3 +183,77 @@ test('askDecision rejects fewer than 2 or more than 3 options', async () => {
     delete process.env.AGENT_PING_REPLY_TOPIC;
   }
 });
+
+test('askDecision promotes the oldest waiting decision instead of jumping the queue when the pending one expired', async () => {
+  const statePath = freshStatePath();
+  process.env.AGENT_PING_STATE = statePath;
+  process.env.AGENT_PING_OUTBOUND_TOPIC = 'outbound-test-topic';
+  process.env.AGENT_PING_REPLY_TOPIC = 'reply-test-topic-2';
+  const common = loadFreshCommon();
+  try {
+    const state = common.readState();
+    state.decisions = [
+      {
+        decisionId: 'aaaaaaaaaaaaaaaa', task: 'A', question: 'q', options: ['A', 'B'],
+        createdAt: new Date(Date.now() - 3600000).toISOString(),
+        expiresAt: new Date(Date.now() - 60000).toISOString(),
+        status: 'pending', priority: 4, response: null,
+      },
+      {
+        decisionId: 'bbbbbbbbbbbbbbbb', task: 'B', question: 'q', options: ['A', 'B'],
+        createdAt: new Date(Date.now() - 300000).toISOString(),
+        status: 'waiting', waitsFor: 'aaaaaaaaaaaaaaaa', expiryMinutes: 720, priority: 4, response: null,
+      },
+    ];
+    common.writeState(state);
+
+    const sent = [];
+    const stubSender = async (args) => { sent.push(args); return '{}'; };
+    const res = await common.askDecision({ taskName: 'D', question: 'q?', options: 'A,B', sender: stubSender });
+    const after = common.readState();
+    const pending = after.decisions.filter((d) => d.status === 'pending').map((d) => d.task);
+    const waiting = after.decisions.filter((d) => d.status === 'waiting').map((d) => d.task);
+    assert.equal(res.queued, true, 'new decision should be queued, not pending');
+    assert.deepEqual(pending, ['B'], 'oldest waiting decision should be promoted to pending');
+    assert.deepEqual(waiting, ['D'], 'new decision should wait behind the promoted one');
+    assert.equal(sent.length, 1, 'exactly one promotion notification should be sent');
+    assert.equal(sent[0].decisionId, 'bbbbbbbbbbbbbbbb', 'promotion should send the waiting decision, not the new one');
+  } finally {
+    delete process.env.AGENT_PING_STATE;
+    delete process.env.AGENT_PING_OUTBOUND_TOPIC;
+    delete process.env.AGENT_PING_REPLY_TOPIC;
+    if (fs.existsSync(statePath)) fs.unlinkSync(statePath);
+    const lockPath = path.join(path.dirname(statePath), 'decisions.lock');
+    if (fs.existsSync(lockPath)) fs.unlinkSync(lockPath);
+  }
+});
+
+test('getConfig falls back to config.json when only one env var is set', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'agent-ping-cfg-'));
+  const configPath = path.join(dir, 'config.json');
+  fs.writeFileSync(configPath, JSON.stringify({ outboundTopic: 'cfg-outbound-topic', replyTopic: 'cfg-reply-topic' }));
+  process.env.AGENT_PING_CONFIG = configPath;
+  process.env.AGENT_PING_OUTBOUND_TOPIC = 'env-outbound-topic';
+  const common = loadFreshCommon();
+  try {
+    const c = common.getConfig();
+    assert.equal(c.outboundTopic, 'cfg-outbound-topic');
+    assert.equal(c.replyTopic, 'cfg-reply-topic');
+  } finally {
+    delete process.env.AGENT_PING_CONFIG;
+    delete process.env.AGENT_PING_OUTBOUND_TOPIC;
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('notify rejects unknown types instead of silently ignoring them', async () => {
+  process.env.AGENT_PING_OUTBOUND_TOPIC = 'outbound-test-topic';
+  process.env.AGENT_PING_REPLY_TOPIC = 'reply-test-topic-2';
+  const common = loadFreshCommon();
+  try {
+    await assert.rejects(common.notify({ title: 't', message: 'm', type: 'bogus' }), /type must be one of/);
+  } finally {
+    delete process.env.AGENT_PING_OUTBOUND_TOPIC;
+    delete process.env.AGENT_PING_REPLY_TOPIC;
+  }
+});
