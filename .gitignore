@@ -10,3 +10,4 @@ node_modules/
 
 tools/publish.ps1
 *.token
+
