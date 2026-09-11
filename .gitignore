@@ -1,5 +1,7 @@
 # local-only working files — never publish real topics or history
 config.json
+*.local.json
+.env
 state/
 *.log
 
@@ -8,4 +10,3 @@ node_modules/
 
 tools/publish.ps1
 *.token
-
