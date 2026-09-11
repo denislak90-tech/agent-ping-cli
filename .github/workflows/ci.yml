@@ -1,0 +1,44 @@
+name: CI
+on:
+  push:
+  pull_request:
+jobs:
+  lint-ps:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          Invoke-ScriptAnalyzer -Path scripts -Recurse -Severity Error,Warning
+      - name: PowerShell smoke test
+        shell: pwsh
+        run: ./tests/smoke.ps1
+  test-node:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Node smoke tests
+        run: node --test tests/*.test.js
+      - name: CLI --help
+        run: node bin/agent-ping.js --help
+  lint-sh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ShellCheck
+        run: shellcheck scripts/*.sh
+  lint-md:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DavidAnson/markdownlint-cli2-action@v19
+        with:
+          globs: "**/*.md"
