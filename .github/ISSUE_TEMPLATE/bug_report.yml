@@ -1,0 +1,23 @@
+name: Bug report
+description: Something broken in a script
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes: { label: "Version / commit", description: "Tag or commit SHA you ran" }
+    validations: { required: true }
+  - type: dropdown
+    id: platform
+    attributes: { label: "Platform", options: [Windows PowerShell 5.1, PowerShell 7+, "bash (macOS/Linux)"] }
+    validations: { required: true }
+  - type: textarea
+    id: repro
+    attributes: { label: "Reproduction steps", description: "Use throwaway test topics. NEVER paste real topics or state/ contents." }
+    validations: { required: true }
+  - type: textarea
+    id: expected
+    attributes: { label: "Expected vs actual" }
+    validations: { required: true }
+  - type: textarea
+    id: output
+    attributes: { label: "Redacted output", description: "Paste RESPONSE_RECEIVED / OPTION= lines with IDs redacted if sensitive" }
