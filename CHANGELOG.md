@@ -23,6 +23,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). Versioning: [S
 - Rejected expired, unknown, replayed, and invalid-option replies.
 - URL-encoded decision action values and validated ntfy HTTP status codes.
 - Added atomic state writes and a PowerShell smoke test for queue/expiry invariants.
+- Fixed a queue-order violation: when the pending decision had expired and older decisions were waiting, a new `ask` became pending directly and jumped ahead of them. The oldest waiting decision is now promoted first and the new one queues behind it (FIFO), in both implementations.
+- npm CLI now falls back to `config.json` when only one of the two topic env vars is set (was throwing a confusing error), and rejects unknown `--type` values for `notify` (was silently ignoring them).
+- `watch-reply.ps1` now logs `LISTENER_ERR` when the ntfy poll fails (was silently swallowing curl errors and timing out).
+- CLI accepts `--flag=value` syntax and `--help` after a subcommand.
+- Fixed mojibake (double-encoded UTF-8) and stale repo URL / test command in `CONTRIBUTING.md`.
 
 ## [0.1.0] - 2026-09-11
 
