@@ -33,7 +33,10 @@ while ((Get-Date) -lt $deadline) {
         if ($changed) { Write-PingState $s }
     } finally { Exit-PingLock }
 
-    $raw = & curl.exe -s --max-time 20 "https://ntfy.sh/$reply/json?poll=1&since=$since" 2>$null
+    try {
+        $raw = & curl.exe -s --max-time 20 "https://ntfy.sh/$reply/json?poll=1&since=$since" 2>$null
+        if ($LASTEXITCODE -ne 0) { Write-Output "LISTENER_ERR: ntfy poll failed (curl exit $LASTEXITCODE)" }
+    } catch { Write-Output "LISTENER_ERR: ntfy poll failed: $($_.Exception.Message)" }
     $lines = @($raw -split "`n" | Where-Object { $_ -match '^\{"id"' })
     if (-not (Enter-PingLock -TimeoutSeconds 30)) { throw 'lock busy' }
     try {
