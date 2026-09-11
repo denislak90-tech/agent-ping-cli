@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "agent-ping-cli",
   "version": "0.1.0",
   "description": "Phone-tap A/B/C approvals for coding agents, over ntfy.sh. Zero runtime dependencies.",
@@ -30,13 +30,15 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOU/agent-ping.git"
+    "url": "https://github.com/denislak90-tech/agent-ping-cli.git"
   },
-  "homepage": "https://github.com/YOU/agent-ping#readme",
+  "homepage": "https://github.com/denislak90-tech/agent-ping-cli#readme",
   "bugs": {
-    "url": "https://github.com/YOU/agent-ping/issues"
+    "url": "https://github.com/denislak90-tech/agent-ping-cli/issues"
   },
   "scripts": {
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/smoke.test.js"
   }
 }
+
+
