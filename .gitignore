@@ -1,0 +1,11 @@
+# local-only working files — never publish real topics or history
+config.json
+state/
+*.log
+
+# Node
+node_modules/
+
+tools/publish.ps1
+*.token
+
