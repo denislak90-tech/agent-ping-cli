@@ -42,6 +42,21 @@ try {
         $s.decisions += [pscustomobject]@{ decisionId = $id; task = $TaskName; question = $Question; options = $opts; createdAt = (Get-Date).ToString('o'); status = 'waiting'; waitsFor = $pend[0].decisionId; expiryMinutes = $ExpiryMinutes; priority = $pnum; response = $null }
         Write-PingState $s; Write-Output "WAITING: queued behind $($pend[0].decisionId)"; Write-Output "DECISION_ID=$id"; exit 2
     }
+    # Nothing pending. If older decisions are waiting, promote the oldest
+    # one first so the queue stays FIFO, then queue behind it.
+    $waiting = @($s.decisions | Where-Object { $_.status -eq 'waiting' })
+    if ($waiting.Count -gt 0) {
+        try {
+            $promoted = Promote-PingWaiting -State $s -OutboundTopic $outbound -ReplyTopic $reply -PriorityNum $pnum
+            if ($promoted) {
+                $s.decisions += [pscustomobject]@{ decisionId = $id; task = $TaskName; question = $Question; options = $opts; createdAt = (Get-Date).ToString('o'); status = 'waiting'; waitsFor = $promoted.decisionId; expiryMinutes = $ExpiryMinutes; priority = $pnum; response = $null }
+                Write-PingState $s; Write-Output "WAITING: queued behind $($promoted.decisionId)"; Write-Output "DECISION_ID=$id"; exit 2
+            }
+        } catch {
+            # Promotion send failed; fall through and become pending. The
+            # waiting decision stays queued and is retried on the next call.
+        }
+    }
     $expires = (Get-Date).AddMinutes($ExpiryMinutes).ToString('o')
     $s.decisions += [pscustomobject]@{ decisionId = $id; task = $TaskName; question = $Question; options = $opts; createdAt = (Get-Date).ToString('o'); expiresAt = $expires; status = 'pending'; priority = $pnum; response = $null }
     Write-PingState $s
