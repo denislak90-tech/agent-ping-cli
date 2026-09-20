@@ -1,13 +1,11 @@
 # agent-ping — phone-tap approvals for coding agents
 
-[![CI](https://github.com/YOU/agent-ping/actions/workflows/ci.yml/badge.svg)](https://github.com/YOU/agent-ping/actions/workflows/ci.yml)
-[![Secret scan](https://github.com/YOU/agent-ping/actions/workflows/gitleaks.yml/badge.svg)](https://github.com/YOU/agent-ping/actions/workflows/gitleaks.yml)
-[![npm version](https://img.shields.io/npm/v/agent-ping-cli.svg)](https://www.npmjs.com/package/agent-ping-cli)
-[![npm downloads](https://img.shields.io/npm/dm/agent-ping-cli.svg)](https://www.npmjs.com/package/agent-ping-cli)
+[![CI](https://github.com/denislak90-tech/agent-ping-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/denislak90-tech/agent-ping-cli/actions/workflows/ci.yml)
+[![Secret scan](https://github.com/denislak90-tech/agent-ping-cli/actions/workflows/gitleaks.yml/badge.svg)](https://github.com/denislak90-tech/agent-ping-cli/actions/workflows/gitleaks.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![ntfy.sh](https://img.shields.io/badge/powered%20by-ntfy.sh-blue)](https://ntfy.sh)
 
-Get a push on your phone when your agent needs you. Tap **A / B / C** — the agent auto-resumes. Built for makers who step away from the keyboard.
+Get a push on your phone when your agent needs you. Tap A / B / C — the waiting agent receives and validates your response so the workflow can continue. Built for makers who step away from the keyboard.
 
 > **Why this exists:** Long-running coding-agent sessions increasingly need a human to approve, reject, or pick between options — merge this? ship this version? which of these three fixes? — without staying glued to a terminal. agent-ping gives *any* agent tool a small, auditable way to ask a human on their phone and get a verified answer back, over open, self-hostable [ntfy.sh](https://ntfy.sh). No vendor lock-in, no server to run, MIT-licensed.
 
@@ -15,7 +13,7 @@ Get a push on your phone when your agent needs you. Tap **A / B / C** — the ag
 - Agents just call a command and read stdout (`DECISION_ID=…`, `RESPONSE_RECEIVED`, `OPTION=…`)
 - One pending decision at a time, waiting queue, expiry, exactly-once replies, file-locked state for concurrent runs
 - Queue promotion is retried after a decision resolves; if a promotion send fails, the queued decision stays queued and is retried on the next ask/watch call
-- Private by design: real ntfy topics live in your local config (git-ignored), never in the repo — CI secret-scans every push
+- Secret-safe by default: real ntfy topics stay in local git-ignored configuration; CI scans every push for accidental secrets.
 
 ## Quickstart (5 min)
 
@@ -66,7 +64,7 @@ If this earns real usage, next on the list: structured audit logs for maintainer
 
 Real ntfy topics and `state/` are git-ignored and secret-scanned. Never commit real topics, message IDs, or decision history. Publish code + docs only.
 
-> **Security Warning:** Never commit real `ntfy` topics or tokens. Treat topic names as credentials because anyone who knows a topic may be able to publish or subscribe to it, depending on its configuration.
+> **Security Warning:** Never commit real `ntfy` topics or tokens. ntfy topics are bearer-style secrets: anyone who knows a topic may be able to publish or subscribe to it, depending on the topic configuration.
 
 ## License
 
@@ -74,6 +72,6 @@ MIT — see [LICENSE](LICENSE).
 
 ## Publishing
 
-The repository is published separately from npm. To push from a local machine, use `tools/publish.ps1`. It reads `GITHUB_TOKEN` or prompts securely; it never writes the token to disk. The token must be fine-grained, limited to this repository, with **Contents: Read and write**.
+The GitHub repository and npm package are published separately. Contributors should use the normal GitHub pull-request workflow. Use `config.example.json` as the safe configuration template. Never commit `config.json`, `state/`, real ntfy topics, tokens or credentials.
 
 Revoke any token that has been pasted into chat, logs, issues, or shell history.
