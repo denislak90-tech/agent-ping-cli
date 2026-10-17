@@ -1,4 +1,4 @@
-﻿name: CI
+name: CI
 on:
   push:
   pull_request:
@@ -6,7 +6,7 @@ jobs:
   lint-ps:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: PSScriptAnalyzer
         shell: pwsh
         run: |
@@ -21,7 +21,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -32,13 +32,13 @@ jobs:
   lint-sh:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: ShellCheck
         run: shellcheck scripts/*.sh
   lint-md:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: DavidAnson/markdownlint-cli2-action@v19
         with:
           globs: "**/*.md"
